@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var addPreloadHeader = (*Vulcain).addPreloadHeader
+
 func TestNew(t *testing.T) {
 	g := New()
 	assert.NotNil(t, g)
@@ -110,4 +112,33 @@ func TestIsValidResponse(t *testing.T) {
 		200,
 		http.Header{"Content-Type": []string{"application/ld+json"}},
 	))
+}
+
+func TestAddPreloadHeader(t *testing.T) {
+	v := New()
+	var h http.Header
+
+	h = http.Header{}
+	addPreloadHeader(v, h, "https://example.com", false)
+	assert.Equal(t, "<https://example.com>; rel=preload; as=fetch", h.Get("Link"))
+
+	h = http.Header{}
+	addPreloadHeader(v, h, "https://example.com", true)
+	assert.Equal(t, "<https://example.com>; rel=preload; as=fetch; nopush", h.Get("Link"))
+
+	h = http.Header{"Access-Control-Allow-Origin": []string{"https://example.com"}}
+	addPreloadHeader(v, h, "https://example.com", false)
+	assert.Equal(t, "<https://example.com>; rel=preload; as=fetch; crossorigin=anonymous", h.Get("Link"))
+
+	h = http.Header{"Access-Control-Allow-Origin": []string{"https://example.com"}}
+	addPreloadHeader(v, h, "https://example.com", true)
+	assert.Equal(t, "<https://example.com>; rel=preload; as=fetch; nopush; crossorigin=anonymous", h.Get("Link"))
+
+	h = http.Header{"Access-Control-Allow-Credentials": []string{"true"}}
+	addPreloadHeader(v, h, "https://example.com", false)
+	assert.Equal(t, "<https://example.com>; rel=preload; as=fetch; crossorigin=use-credentials", h.Get("Link"))
+
+	h = http.Header{"Access-Control-Allow-Credentials": []string{"true"}}
+	addPreloadHeader(v, h, "https://example.com", true)
+	assert.Equal(t, "<https://example.com>; rel=preload; as=fetch; nopush; crossorigin=use-credentials", h.Get("Link"))
 }

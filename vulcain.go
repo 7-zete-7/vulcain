@@ -276,6 +276,11 @@ func (v *Vulcain) addPreloadHeader(h http.Header, link string, nopush bool) {
 	if nopush {
 		suffix = "; nopush"
 	}
+	if h.Get("Access-Control-Allow-Credentials") == "true" {
+		suffix += "; crossorigin=use-credentials"
+	} else if h.Get("Access-Control-Allow-Origin") != "" {
+		suffix += "; crossorigin=anonymous"
+	}
 
 	h.Add("Link", "<"+link+">; rel=preload; as=fetch"+suffix)
 	v.logger.Debug("link preload header added", zap.String("relation", link))

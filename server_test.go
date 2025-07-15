@@ -95,7 +95,7 @@ func TestH2NoPush(t *testing.T) {
 
 	b, _ := io.ReadAll(resp.Body)
 
-	assert.Equal(t, []string{"</books/1.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch", "</books/2.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch"}, resp.Header["Link"])
+	assert.Equal(t, []string{"</books/1.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch; crossorigin=use-credentials", "</books/2.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch; crossorigin=use-credentials"}, resp.Header["Link"])
 	assert.Equal(t, `{"hydra:member":["/books/1.jsonld?preload=%22%2Fauthor%22","/books/2.jsonld?preload=%22%2Fauthor%22"]}`, string(b))
 	_ = g.server.Shutdown(context.Background())
 }
@@ -115,7 +115,7 @@ func TestMultipleValues(t *testing.T) {
 
 	b, _ := io.ReadAll(resp.Body)
 
-	assert.Equal(t, []string{"</authors/1.jsonld>; rel=preload; as=fetch", "</books/99.jsonld>; rel=preload; as=fetch"}, resp.Header["Link"])
+	assert.Equal(t, []string{"</authors/1.jsonld>; rel=preload; as=fetch; crossorigin=use-credentials", "</books/99.jsonld>; rel=preload; as=fetch; crossorigin=use-credentials"}, resp.Header["Link"])
 	assert.Equal(t, `{"author":"/authors/1.jsonld","related":"/books/99.jsonld"}`, string(b))
 	_ = g.server.Shutdown(context.Background())
 }
@@ -227,7 +227,7 @@ func TestPreloadQuery(t *testing.T) {
 	resp, _ := http.Get(gateway.URL + `/books.jsonld?fields="/hydra:member/*"&preload="/hydra:member/*/author"`)
 	b, _ := io.ReadAll(resp.Body)
 
-	assert.Equal(t, []string{"</books/1.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch", "</books/2.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch"}, resp.Header["Link"])
+	assert.Equal(t, []string{"</books/1.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch; crossorigin=use-credentials", "</books/2.jsonld?preload=%22%2Fauthor%22>; rel=preload; as=fetch; crossorigin=use-credentials"}, resp.Header["Link"])
 	assert.Equal(t, `{"hydra:member":["/books/1.jsonld?preload=%22%2Fauthor%22","/books/2.jsonld?preload=%22%2Fauthor%22"]}`, string(b))
 }
 
@@ -244,7 +244,7 @@ func TestPreloadHeader(t *testing.T) {
 	resp, _ := client.Do(req)
 	b, _ := io.ReadAll(resp.Body)
 
-	assert.ElementsMatch(t, []string{"</books/1.jsonld>; rel=preload; as=fetch", "</books/2.jsonld>; rel=preload; as=fetch"}, resp.Header["Link"])
+	assert.ElementsMatch(t, []string{"</books/1.jsonld>; rel=preload; as=fetch; crossorigin=use-credentials", "</books/2.jsonld>; rel=preload; as=fetch; crossorigin=use-credentials"}, resp.Header["Link"])
 	assert.ElementsMatch(t, []string{"Preload", "Fields"}, resp.Header["Vary"])
 	assert.Equal(t, `{"hydra:member":[
 		"/books/1.jsonld",
@@ -263,7 +263,7 @@ func TestPreloadHeaderNoPush(t *testing.T) {
 
 	resp, _ := client.Do(req)
 
-	assert.ElementsMatch(t, []string{"</books/1.jsonld>; rel=preload; as=fetch; nopush", "</books/2.jsonld>; rel=preload; as=fetch; nopush"}, resp.Header["Link"])
+	assert.ElementsMatch(t, []string{"</books/1.jsonld>; rel=preload; as=fetch; nopush; crossorigin=use-credentials", "</books/2.jsonld>; rel=preload; as=fetch; nopush; crossorigin=use-credentials"}, resp.Header["Link"])
 	assert.ElementsMatch(t, []string{"Preload"}, resp.Header["Vary"])
 }
 
@@ -272,7 +272,7 @@ func TestEarlyHints(t *testing.T) {
 	defer upstream.Close()
 	defer gateway.Close()
 
-	expectedLinkHeaders := []string{"</books/1.jsonld>; rel=preload; as=fetch", "</books/2.jsonld>; rel=preload; as=fetch"}
+	expectedLinkHeaders := []string{"</books/1.jsonld>; rel=preload; as=fetch; crossorigin=use-credentials", "</books/2.jsonld>; rel=preload; as=fetch; crossorigin=use-credentials"}
 
 	// early hint should be sent when a preload header is set
 	var earlyHintsCount int
